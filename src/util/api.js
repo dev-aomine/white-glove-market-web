@@ -144,3 +144,7 @@ export const transitionPrivileged = body => {
 export const createUserWithIdp = body => {
   return post('/api/auth/create-user-with-idp', body);
 };
+
+export const createVideoRoom = body => {
+  return post('/api/video-sdk/create-room', body);
+};

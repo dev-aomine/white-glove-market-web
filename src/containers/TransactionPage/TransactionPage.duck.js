@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import { types as sdkTypes, createImageVariantConfig } from '../../util/sdkLoader';
 import { findNextBoundary, getStartOf, monthIdString } from '../../util/dates';
 import { isTransactionsTransitionInvalidTransition, storableError } from '../../util/errors';
-import { transactionLineItems } from '../../util/api';
+import { createVideoRoom, transactionLineItems } from '../../util/api';
 import * as log from '../../util/log';
 import {
   updatedEntities,
@@ -18,8 +18,9 @@ import {
   isBookingProcess,
 } from '../../transactions/transaction';
 
-import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
+import { addMarketplaceEntities, getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { fetchCurrentUserNotifications } from '../../ducks/user.duck';
+import { transitions } from '../../transactions/transactionProcessBooking';
 
 const { UUID } = sdkTypes;
 
@@ -516,14 +517,37 @@ const refreshTransactionEntity = (sdk, txId, dispatch) => {
     });
 };
 
-export const makeTransition = (txId, transitionName, params) => (dispatch, getState, sdk) => {
+export const makeTransition = (txId, transitionName, params) => async (dispatch, getState, sdk) => {
   if (transitionInProgress(getState())) {
     return Promise.reject(new Error('Transition already in progress'));
   }
   dispatch(transitionRequest(transitionName));
 
+  let newParams = params;
+
+  const tx = getMarketplaceEntities(getState(), [{ id: txId, type: 'transaction' }])[0];
+
+  if (
+    transitions.ACCEPT === transitionName &&
+    tx.attributes.protectedData.sessionType === 'virtual'
+  ) {
+    const response = await createVideoRoom({
+      txId: tx.id.uuid,
+    });
+
+    newParams = {
+      ...params,
+      protectedData: {
+        ...(params?.protectedData || {}),
+        customerLink: `${window.location.origin}/video-conference?txId=${tx.id.uuid}`,
+        providerLink: `${window.location.origin}/video-conference?txId=${tx.id.uuid}`,
+        meetingId: response.customRoomId,
+      },
+    };
+  }
+
   return sdk.transactions
-    .transition({ id: txId, transition: transitionName, params }, { expand: true })
+    .transition({ id: txId, transition: transitionName, params: newParams }, { expand: true })
     .then(response => {
       dispatch(addMarketplaceEntities(response));
       dispatch(transitionSuccess());
