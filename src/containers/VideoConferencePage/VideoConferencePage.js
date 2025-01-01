@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { VideoSDKMeeting } from '@videosdk.live/rtc-js-prebuilt';
 import { denormalisedResponseEntities } from '../../util/data';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { currentUserIdSelector } from '../../ducks/user.duck';
 import { useConfiguration } from '../../context/configurationContext';
 import { transitions } from '../../transactions/transactionProcessBooking';
 
-const getTxById = async id => {
-  const txRes = await window.app.sdk.transactions.show(
+const getTxById = txId => async (dispatch, getState, sdk) => {
+  const txRes = await sdk.transactions.show(
     {
-      id,
+      id: txId,
       include: ['customer', 'provider', 'listing', 'listing.images', 'booking'],
     },
     { expand: true }
@@ -22,10 +22,7 @@ function VideoConferencePage() {
   const [isLoading, setIsLoading] = useState(true);
   const currentUserId = useSelector(currentUserIdSelector);
   const config = useConfiguration();
-
-  if (typeof window === 'undefined') {
-    return null;
-  }
+  const dispatch = useDispatch();
 
   useEffect(() => {
     (async () => {
@@ -33,7 +30,7 @@ function VideoConferencePage() {
         const urlParams = new URLSearchParams(window.location.search);
         const txId = urlParams.get('txId');
 
-        const tx = await getTxById(txId);
+        const tx = await dispatch(getTxById(txId));
 
         if (tx.attributes.lastTransition !== transitions.ACCEPT) {
           throw new Error('Transaction not accepted');
