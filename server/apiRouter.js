@@ -20,6 +20,8 @@ const createUserWithIdp = require('./api/auth/createUserWithIdp');
 
 const { authenticateFacebook, authenticateFacebookCallback } = require('./api/auth/facebook');
 const { authenticateGoogle, authenticateGoogleCallback } = require('./api/auth/google');
+const { createRoom } = require('./api/video-sdk');
+const authenticateFlexUser = require('./middleware/authenticateFlexUser');
 
 const router = express.Router();
 
@@ -79,5 +81,8 @@ router.get('/auth/google', authenticateGoogle);
 // with Google. In this route a Passport.js custom callback is used for calling
 // loginWithIdp endpoint in Sharetribe Auth API to authenticate user to the marketplace
 router.get('/auth/google/callback', authenticateGoogleCallback);
+
+//Video-sdk
+router.post('/video-sdk/create-room', authenticateFlexUser, createRoom);
 
 module.exports = router;
