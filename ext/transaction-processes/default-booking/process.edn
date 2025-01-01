@@ -45,15 +45,15 @@
    :actor :actor.role/provider,
    :actions
    [{:name :action/accept-booking}
-    {:name :action/stripe-capture-payment-intent}],
+    {:name :action/stripe-capture-payment-intent}
+    {:name :action/update-protected-data}],
    :from :state/preauthorized,
    :to :state/accepted}
   {:name :transition/operator-accept,
    :actor :actor.role/operator,
    :actions
    [{:name :action/accept-booking}
-    {:name :action/stripe-capture-payment-intent}
-    {:name :action/update-protected-data}],
+    {:name :action/stripe-capture-payment-intent}],
    :from :state/preauthorized,
    :to :state/accepted}
   {:name :transition/decline,
