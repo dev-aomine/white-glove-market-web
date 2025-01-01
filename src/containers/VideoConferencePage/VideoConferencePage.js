@@ -41,12 +41,13 @@ function VideoConferencePage() {
         const participantId = tx[role].id.uuid;
         const { meetingId } = tx.attributes.protectedData;
 
+        const redirectUrl = `${window.location.origin}/${isHost ? 'sale' : 'order'}/${tx.id.uuid}`;
+
         const params = {
           name,
           meetingId,
           apiKey: process.env.REACT_APP_VIDEO_SDK_API_KEY,
           containerId: 'meeting-container',
-          redirectOnLeave: `${window.location.origin}/${isHost ? 'sale' : 'order'}/${tx.id.uuid}`,
 
           //default config
           realtimeTranscription: {
@@ -69,10 +70,22 @@ function VideoConferencePage() {
             poweredBy: false,
           },
           moreOptionsEnabled: false,
+          permissions: {
+            toggleRealtimeTranscription: true,
+            endMeeting: true,
+          },
+          leftScreen: {
+            actionButton: {
+              label: 'Go to Order page',
+              href: redirectUrl,
+            },
+            rejoinButtonEnabled: false,
+          },
         };
 
         const meeting = new VideoSDKMeeting();
         meeting.init(params);
+
         setIsLoading(false);
       } catch (error) {
         console.error(error);

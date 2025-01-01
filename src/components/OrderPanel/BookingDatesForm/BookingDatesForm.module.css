@@ -76,3 +76,32 @@
   stroke: var(--colorWhite);
   fill: var(--colorWhite);
 }
+
+.sessionTitle {
+  font-weight: var(--fontWeightBold);
+}
+.sessionContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.sessionWrapper {
+  margin: 0px 24px;
+  @media (--viewportMedium) {
+    margin: 0;
+  }
+}
+.sessionBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  border: 1px solid #d8dce6;
+}
+.activeCustomBlock {
+  border: 1px solid var(--marketplaceColorLight);
+}
