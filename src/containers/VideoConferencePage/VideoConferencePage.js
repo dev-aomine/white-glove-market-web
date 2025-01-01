@@ -23,6 +23,10 @@ function VideoConferencePage() {
   const currentUserId = useSelector(currentUserIdSelector);
   const config = useConfiguration();
 
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
   useEffect(() => {
     (async () => {
       try {
